@@ -1,0 +1,8 @@
+
+<{% firstof self.wrapper_tag "div" %} 
+    {% if self.custom_attribute %}
+        {{ self.custom_attribute |safe }}
+    {% endif %}
+>
+    {{ self.content }}
+</{% firstof self.wrapper_tag "div" %}>

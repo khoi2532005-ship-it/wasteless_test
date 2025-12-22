@@ -1,0 +1,132 @@
+{% extends "coderedcms/pages/base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            <h1 class="mb-4">Search Results</h1>
+
+            <!-- Search Form -->
+            <form method="get" action="{% url 'crx_search' %}" class="mb-4">
+                <div class="input-group input-group-lg">
+                    <input type="text" name="query" class="form-control" placeholder="Search for coffee, bánh mì..."
+                        value="{{ query }}" autofocus>
+                    <button class="btn btn-primary" type="submit">
+                        🔍 Search
+                    </button>
+                </div>
+            </form>
+
+            {% if query %}
+            <!-- "Did You Mean?" Suggestion -->
+            {% if did_you_mean %}
+            <div class="alert alert-info mb-4">
+                <div class="d-flex align-items-center">
+                    <span class="me-2">💡</span>
+                    <div>
+                        <strong>Did you mean:</strong>
+                        <a href="?query={{ did_you_mean }}" class="alert-link fw-bold">
+                            {{ did_you_mean }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Showing results for -->
+            <div class="mb-4">
+                <p class="text-muted">
+                    {% if results %}
+                    Showing results for: <strong>{{ query }}</strong>
+                    {% else %}
+                    No results found for: <strong>{{ query }}</strong>
+                    {% endif %}
+                </p>
+
+                <!-- Additional AI Suggestions (Related searches) -->
+                {% if suggestions and suggestions|length > 1 %}
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-2">Also searching for:</small>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for suggestion in suggestions %}
+                        {% if suggestion.term|lower != query|lower %}
+                        <a href="?query={{ suggestion.term }}"
+                            class="badge bg-success text-white text-decoration-none py-2 px-3">
+                            {{ suggestion.term }}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Results -->
+                {% if results %}
+                <div class="mb-3">
+                    <h5>Found {{ total_results }} result{{ total_results|pluralize }}</h5>
+                </div>
+
+                <div class="search-results">
+                    {% for result in results %}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="{% pageurl result %}" class="text-decoration-none">
+                                    {{ result.title }}
+                                </a>
+                            </h4>
+
+                            {% if result.search_description %}
+                            <p class="card-text text-muted">
+                                {{ result.search_description|truncatewords:30 }}
+                            </p>
+                            {% endif %}
+
+                            <a href="{% pageurl result %}" class="btn btn-sm btn-outline-primary">
+                                Read more →
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- No Results -->
+                <div class="alert alert-warning">
+                    <h5>😕 No results found</h5>
+                    <p>We couldn't find anything matching "<strong>{{ query }}</strong>"</p>
+
+                    <div class="mt-3">
+                        <p class="mb-2"><strong>Try:</strong></p>
+                        <ul>
+                            <li>Using different keywords</li>
+                            <li>Checking your spelling</li>
+                            {% if suggestions %}
+                            <li>Searching for:
+                                {% for suggestion in suggestions|slice:":3" %}
+                                <a href="?query={{ suggestion.term }}" class="alert-link">
+                                    {{ suggestion.term }}
+                                </a>
+                                {% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <!-- Empty state -->
+                <div class="text-center py-5">
+                    <h3 class="text-muted mb-3">🔍 Search Wasteless</h3>
+                    <p class="text-muted">
+                        Try: "cà phê", "bánh mì", "cf"...
+                    </p>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    {% endblock %}

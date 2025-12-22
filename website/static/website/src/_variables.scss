@@ -1,0 +1,82 @@
+/// Custom variables for this project which will override Bootstrap defaults.
+/// Some of the most commonly used variables are included below.
+/// Uncomment and change, or add more variables here to match your brand.
+///
+/// All variables can be found here:
+///   https://github.com/twbs/bootstrap/blob/v5.3.2/scss/_variables.scss
+///
+/// Bootstrap guide can be found here:
+///   https://getbootstrap.com/docs/5.3/customize/overview/
+
+
+/// Color system
+///
+/// For example, if your brand color is neon green (#00ff00), set primary to the
+/// hex value, then reference $primary where needed. This way Bootstrap will
+/// pick up on your color and use it everywhere:
+///
+///     $primary: #00ff00
+///
+/// See: https://getbootstrap.com/docs/5.3/customize/color/
+
+$primary:       #28a745;
+$secondary:     #fd7e14;
+$success:       #039c03;
+$info:          cyan;
+$warning:       yellow;
+$danger:        #e32828;
+$light:         #c2f1cd;
+$dark:          $light;
+
+
+/// Body
+///
+/// Settings for the `<body>` element.
+
+$body-bg:                   #f9f9f9;
+$body-color:                gray;
+
+
+/// Typography
+///
+/// Font, line-height, and color for body text, headings, and more.
+
+// Body fonts.
+// $font-family-base:            null;
+// $font-size-base:              1rem;
+// $font-weight-light:           300;
+// $font-weight-normal:          400;
+// $font-weight-semibold:        600;
+// $font-weight-bold:            700;
+// $font-weight-base:            $font-weight-normal;
+
+// Headings
+// $headings-font-family:        null;
+// $headings-font-weight:        500;
+// $headings-color:              null;
+// $h1-font-size:                $font-size-base * 2.5;
+// $h2-font-size:                $font-size-base * 2;
+// $h3-font-size:                $font-size-base * 1.75;
+// $h4-font-size:                $font-size-base * 1.5;
+// $h5-font-size:                $font-size-base * 1.25;
+// $h6-font-size:                $font-size-base;
+.btn-primary {
+    color:  white !important;
+}
+#navbar .nav-link{
+    color: #039c03 !important;
+    font-weight: bold;
+    font-size: large;
+}
+button.navbar-toggler {
+    border-color:  #039c03 !important; /* viền trắng */
+    font-weight: bold;
+    font-size: large;
+}
+
+.navbar-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+}
+body{
+    color: #000 !important;
+}
