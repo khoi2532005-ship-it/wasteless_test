@@ -3,6 +3,7 @@ from wagtail.models import Page
 from wagtail.search.backends import get_search_backend
 from .models import ArticlePage
 from .search_ai import search_ai
+from django.core.cache import cache
 
 
 def ai_powered_search(request):
@@ -24,28 +25,33 @@ def ai_powered_search(request):
     if not query_string:
         return render(request, 'website/search_results.html', context)
     
-    # Build candidate terms from your content
-    candidates = []
-    
-    # Get titles from existing articles
-    article_titles = list(ArticlePage.objects.live().values_list('title', flat=True))
-    candidates.extend(article_titles)
-    
-    # Add common Vietnamese food/drink terms
-    common_terms = [
-        'cà phê', 'cafe', 'coffee', 'cà phê đen', 'cà phê sữa',
-        'trà', 'trà sữa', 'milk tea', 'trà đào',
-        'bánh mì', 'bánh mì thịt', 'sandwich',
-        'cơm', 'cơm tấm', 'cơm chiên',
-        'phở', 'phở bò', 'phở gà',
-        'bún', 'bún bò', 'bún chả',
-        'nước', 'nước ngọt', 'soda',
-        'kem', 'ice cream',
-    ]
-    candidates.extend(common_terms)
-    
-    # Remove duplicates
-    candidates = list(set(candidates))
+    # Cache candidates for 1 hour
+    candidates = cache.get('search_candidates')
+    if candidates is None:
+        candidates = []
+        
+        # Get titles from existing articles
+        article_titles = list(ArticlePage.objects.live().values_list('title', flat=True))
+        candidates.extend(article_titles)
+        
+        # Add common Vietnamese food/drink terms
+        common_terms = [
+            'cà phê', 'cafe', 'coffee', 'cà phê đen', 'cà phê sữa',
+            'trà', 'trà sữa', 'milk tea', 'trà đào',
+            'bánh mì', 'bánh mì thịt', 'sandwich',
+            'cơm', 'cơm tấm', 'cơm chiên',
+            'phở', 'phở bò', 'phở gà',
+            'bún', 'bún bò', 'bún chả',
+            'nước', 'nước ngọt', 'soda',
+            'kem', 'ice cream',
+        ]
+        candidates.extend(common_terms)
+        
+        # Remove duplicates
+        candidates = list(set(candidates))
+        
+        # Store in cache for 1 hour
+        cache.set('search_candidates', candidates, 3600)
     
     # Get AI suggestions
     ai_suggestions = search_ai.find_similar(query_string, candidates, top_k=5, threshold=0.35)

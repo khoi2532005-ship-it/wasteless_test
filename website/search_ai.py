@@ -30,7 +30,7 @@ class LocalSearchAI:
     def __init__(self):
         if self._model is None:
             print("Loading AI model ...")
-            self._model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+            self._model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
             print("Model loaded successfully!")
     
     @property
