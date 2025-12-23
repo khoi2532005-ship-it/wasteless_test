@@ -30,6 +30,15 @@ Open this directory in a command prompt, then:
 
 4. Go to http://localhost:8000/ in your browser, or http://localhost:8000/admin/
    to log in and get to work!
+   
+## AI-Powered Search
+
+This site uses local AI for smart Vietnamese search:
+- Abbreviations: "cf" → "cà phê"
+- Semantic matching with Sentence Transformers
+- No external API calls needed
+
+First search loads the model (5-10 seconds), then instant!
 
 
 ## Linting / pre-deployment
