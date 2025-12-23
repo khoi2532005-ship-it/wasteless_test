@@ -1,15 +1,16 @@
 from django.shortcuts import render
 from wagtail.models import Page
-from wagtail.search.backends import get_search_backend
 from .models import ArticlePage
 from .search_ai import search_ai
 from django.core.cache import cache
+from concurrent.futures import ThreadPoolExecutor
 
 
 def ai_powered_search(request):
     """
     Smart search with Vietnamese AI support using Wagtail's built-in search.
     Handles abbreviations like "cf" -> "cà phê"
+    Optimized with caching, limits, and parallel processing.
     """
     query_string = request.GET.get('query', '').strip()
     
@@ -46,32 +47,40 @@ def ai_powered_search(request):
             'kem', 'ice cream',
         ]
         candidates.extend(common_terms)
-        
-        # Remove duplicates
         candidates = list(set(candidates))
-        
-        # Store in cache for 1 hour
         cache.set('search_candidates', candidates, 3600)
     
-    # Get AI suggestions
-    ai_suggestions = search_ai.find_similar(query_string, candidates, top_k=5, threshold=0.35)
+    # Run AI operations in parallel
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_suggestions = executor.submit(
+            search_ai.find_similar, 
+            query_string, candidates, 3, 0.4  # Reduced from 5 to 3
+        )
+        future_expanded = executor.submit(
+            search_ai.expand_search_query,
+            query_string, candidates, 3
+        )
+        
+        ai_suggestions = future_suggestions.result()
+        expanded_terms = future_expanded.result()
     
-    # Expand search terms (includes manual abbreviations + AI)
-    expanded_terms = search_ai.expand_search_query(query_string, candidates, max_terms=3)
-    
-    # Use Wagtail's built-in search
+    # Use Wagtail's built-in search with limits
     results = []
     seen_ids = set()
     
-    # Search using all expanded terms
     for term in expanded_terms:
-        pages = Page.objects.live().public().search(term)
+        pages = Page.objects.live().public().search(term)[:20]  # Limit per term
         
-        # Add results without duplicates
         for page in pages:
             if page.id not in seen_ids:
                 results.append(page.specific)
                 seen_ids.add(page.id)
+            
+            if len(results) >= 30:  # Max 30 results
+                break
+        
+        if len(results) >= 30:
+            break
     
     # Determine "did you mean" suggestion
     show_suggestion = (
@@ -82,7 +91,7 @@ def ai_powered_search(request):
     did_you_mean = None
     if show_suggestion and ai_suggestions:
         best = ai_suggestions[0]
-        if best['term'].lower() != query_string.lower() and best['score'] > 0.35:
+        if best['term'].lower() != query_string.lower() and best['score'] > 0.4:  # Increased threshold
             did_you_mean = best['term']
     
     context.update({
